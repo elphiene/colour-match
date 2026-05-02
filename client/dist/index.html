@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Colour Match</title>
+  <script type="module" crossorigin src="/assets/index-DFSoXYmj.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-l3G5yzOz.css">
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="header-left">
+        <span class="logo">◈ Colour Match</span>
+        <select id="printer-select" title="Active printer"></select>
+      </div>
+      <nav>
+        <button class="nav-btn active" data-view="match">Match</button>
+        <button class="nav-btn" data-view="history">History</button>
+        <button class="nav-btn" data-view="inks">Ink Library</button>
+        <button class="nav-btn" data-view="calibrate">Calibrate</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- ── MATCH VIEW ─────────────────────────────────────────────── -->
+    <section id="view-match" class="view active">
+      <div class="match-layout">
+
+        <!-- Left: Job setup -->
+        <div class="card" id="job-card">
+          <h2>Colour Job</h2>
+          <div class="field">
+            <label>Job / Colour Name</label>
+            <input type="text" id="job-name" placeholder="e.g. Brandpack Red" />
+          </div>
+          <div class="field">
+            <label>Target LAB <span class="hint">(from Flexpack / spectrophotometer)</span></label>
+            <div class="lab-row">
+              <div class="lab-field"><span>L*</span><input type="number" id="target-l" step="0.01" min="0" max="100" /></div>
+              <div class="lab-field"><span>a*</span><input type="number" id="target-a" step="0.01" min="-128" max="127" /></div>
+              <div class="lab-field"><span>b*</span><input type="number" id="target-b" step="0.01" min="-128" max="127" /></div>
+            </div>
+          </div>
+          <div class="swatch-row">
+            <div class="swatch-wrap">
+              <div id="target-swatch" class="swatch"></div>
+              <span>Target</span>
+            </div>
+            <div class="swatch-wrap">
+              <div id="result-swatch" class="swatch"></div>
+              <span>Result</span>
+            </div>
+          </div>
+          <button class="btn-primary" id="btn-new-job">Start Job</button>
+          <button class="btn-ghost" id="btn-cancel-job" style="display:none">Cancel</button>
+        </div>
+
+        <!-- Middle: Recipe entry -->
+        <div class="card" id="recipe-card">
+          <div class="card-header-row">
+            <h2>Flexpack Recipe</h2>
+            <button class="btn-ghost btn-sm" id="btn-load-ink">Load ink…</button>
+          </div>
+          <div class="cmykog-grid">
+            <div class="channel c"><label>C</label><input type="number" id="ch-c" step="0.1" min="0" max="100" value="0" /><span>%</span></div>
+            <div class="channel m"><label>M</label><input type="number" id="ch-m" step="0.1" min="0" max="100" value="0" /><span>%</span></div>
+            <div class="channel y"><label>Y</label><input type="number" id="ch-y" step="0.1" min="0" max="100" value="0" /><span>%</span></div>
+            <div class="channel k"><label>K</label><input type="number" id="ch-k" step="0.1" min="0" max="100" value="0" /><span>%</span></div>
+            <div class="channel o"><label>O</label><input type="number" id="ch-o" step="0.1" min="0" max="100" value="0" /><span>%</span></div>
+            <div class="channel g"><label>G</label><input type="number" id="ch-g" step="0.1" min="0" max="100" value="0" /><span>%</span></div>
+          </div>
+          <div class="field" style="margin-top:1rem">
+            <label>Measured Result LAB <span class="hint">(after printing)</span></label>
+            <div class="lab-row">
+              <div class="lab-field"><span>L*</span><input type="number" id="result-l" step="0.01" min="0" max="100" /></div>
+              <div class="lab-field"><span>a*</span><input type="number" id="result-a" step="0.01" min="-128" max="127" /></div>
+              <div class="lab-field"><span>b*</span><input type="number" id="result-b" step="0.01" min="-128" max="127" /></div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Notes</label>
+            <input type="text" id="attempt-notes" placeholder="Optional" />
+          </div>
+          <button class="btn-primary" id="btn-log-attempt" disabled>Log Attempt</button>
+        </div>
+
+        <!-- Right: Results -->
+        <div class="card" id="results-card">
+          <h2>Results</h2>
+          <div id="results-empty" class="empty-state">Log an attempt to see results</div>
+          <div id="results-content" style="display:none">
+            <div class="delta-e-display">
+              <span class="de-label">ΔE2000</span>
+              <span class="de-value" id="de-value">—</span>
+              <span class="de-badge" id="de-badge"></span>
+            </div>
+            <div class="delta-grid">
+              <div class="delta-item">
+                <span class="delta-label">ΔL*</span>
+                <span class="delta-val" id="dl-val">—</span>
+                <span class="delta-hint" id="dl-hint"></span>
+              </div>
+              <div class="delta-item">
+                <span class="delta-label">Δa*</span>
+                <span class="delta-val" id="da-val">—</span>
+                <span class="delta-hint" id="da-hint"></span>
+              </div>
+              <div class="delta-item">
+                <span class="delta-label">Δb*</span>
+                <span class="delta-val" id="db-val">—</span>
+                <span class="delta-hint" id="db-hint"></span>
+              </div>
+            </div>
+            <div class="correction-guide" id="correction-guide"></div>
+            <div class="attempts-list" id="attempts-list"></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── HISTORY VIEW ───────────────────────────────────────────── -->
+    <section id="view-history" class="view">
+      <div class="view-header">
+        <h2>Job History</h2>
+        <input type="text" id="history-search" placeholder="Search jobs…" />
+      </div>
+      <div id="history-list" class="history-list"></div>
+    </section>
+
+    <!-- ── INK LIBRARY VIEW ──────────────────────────────────────── -->
+    <section id="view-inks" class="view">
+      <div class="view-header">
+        <h2>Custom Ink Library</h2>
+        <button class="btn-primary btn-sm" id="btn-add-ink">+ Add Ink</button>
+      </div>
+      <div id="ink-list" class="ink-list"></div>
+    </section>
+  </main>
+
+  <!-- ── CALIBRATE VIEW ──────────────────────────────────────────── -->
+    <section id="view-calibrate" class="view">
+      <div class="view-header">
+        <h2>Printer Calibration</h2>
+      </div>
+
+      <!-- Chart uploads -->
+      <div class="card" style="margin-bottom:1rem">
+        <div class="card-header-row">
+          <h2>Reference Charts</h2>
+        </div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:.85rem">
+          Upload your own chart PDFs. Surface &amp; Reverse share the no-white chart; CBW uses the white chart.
+          Once uploaded these replace the auto-generated chart for download.
+        </p>
+        <div class="chart-upload-grid">
+          <div class="chart-upload-slot" id="slot-no-white">
+            <div class="chart-slot-label">
+              <strong>No-white chart</strong>
+              <span>Surface · Reverse</span>
+            </div>
+            <div class="chart-slot-status" id="status-no-white">Not uploaded</div>
+            <label class="btn-ghost btn-sm chart-upload-btn">
+              Upload PDF
+              <input type="file" accept=".pdf" data-type="no-white" style="display:none" class="chart-file-input" />
+            </label>
+          </div>
+          <div class="chart-upload-slot" id="slot-white">
+            <div class="chart-slot-label">
+              <strong>White chart</strong>
+              <span>CBW</span>
+            </div>
+            <div class="chart-slot-status" id="status-white">Not uploaded</div>
+            <label class="btn-ghost btn-sm chart-upload-btn">
+              Upload PDF
+              <input type="file" accept=".pdf" data-type="white" style="display:none" class="chart-file-input" />
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Measurements -->
+      <div class="card">
+        <div class="card-header-row">
+          <h2>Patch Measurements</h2>
+          <div style="display:flex;gap:.5rem;align-items:center">
+            <button class="btn-ghost btn-sm" id="btn-clear-cal">Clear</button>
+            <a class="btn-primary btn-sm" id="btn-download-pdf" href="#" style="text-decoration:none;text-align:center">↓ Chart PDF</a>
+          </div>
+        </div>
+
+        <div class="mode-switcher" style="margin-bottom:1rem">
+          <button class="mode-btn active" data-mode="surface">
+            <strong>Surface</strong>
+            <span>No white · laminated</span>
+          </button>
+          <button class="mode-btn" data-mode="reverse">
+            <strong>Reverse</strong>
+            <span>Upside-down on clear</span>
+          </button>
+          <button class="mode-btn" data-mode="cbw">
+            <strong>CBW</strong>
+            <span>White base on clear</span>
+          </button>
+        </div>
+
+        <div class="cal-progress-wrap">
+          <div class="cal-progress-bar"><div id="cal-progress-fill"></div></div>
+          <span id="cal-progress-label">0 / 96 patches measured</span>
+        </div>
+        <p class="cal-instructions">
+          Print the chart PDF via Flexpack using the exact CMYKOG values shown. Measure each patch and enter L*, a*, b* below. Tab across a row to move to the next.
+        </p>
+        <div class="cal-table-wrap">
+          <table class="cal-table" id="cal-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th style="color:var(--c-color)">C</th>
+                <th style="color:var(--m-color)">M</th>
+                <th style="color:#b5a000">Y</th>
+                <th>K</th>
+                <th style="color:var(--o-color)">O</th>
+                <th style="color:var(--g-color)">G</th>
+                <th>Swatch</th>
+                <th>L*</th>
+                <th>a*</th>
+                <th>b*</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="cal-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  <!-- ── MODALS ────────────────────────────────────────────────────── -->
+  <div id="modal-overlay" class="modal-overlay" style="display:none">
+    <div class="modal" id="modal-box">
+      <div class="modal-header">
+        <h3 id="modal-title">Modal</h3>
+        <button class="modal-close" id="modal-close">✕</button>
+      </div>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+</body>
+</html>
